@@ -1811,7 +1811,14 @@ open_connection( const char *host, u_short port )
     saddr.sin_port = htons(port);
 
     debug("connecting to %s:%u\n", inet_ntoa(saddr.sin_addr), port);
-    s = socket( AF_INET, SOCK_STREAM, 0 );
+#ifndef IPPROTO_MPTCP
+#if defined(__linux__)
+#define IPPROTO_MPTCP 262
+#else
+#define IPPROTO_MPTCP 0
+#endif
+#endif
+    s = socket( AF_INET, SOCK_STREAM, IPPROTO_MPTCP );
     if ( connect( s, (struct sockaddr *)&saddr, sizeof(saddr))
          == SOCKET_ERROR) {
         debug( "connect() failed.\n");
